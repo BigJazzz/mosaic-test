@@ -1,5 +1,5 @@
 // Configuration
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwXo8mCsBgpX45bUmAD70uGVFgu1FaUoS_JupeWlSXi6W6__b8JqWpeCzX3Yxnlm0I6Qw/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwLiFbNPnrXCadUpX_u3af7HNZuXP_lvIVlT_3hSv3sr6t54JH_yq4JeK1ap8J2yxe3Rg/exec';
 
 // DOM Elements
 const loginSection = document.getElementById('login-section');
