@@ -1,5 +1,6 @@
 // Configuration
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwLiFbNPnrXCadUpX_u3af7HNZuXP_lvIVlT_3hSv3sr6t54JH_yq4JeK1ap8J2yxe3Rg/exec';
+const APP_VERSION = "v1.2_Login_And_Version";
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyQa5kBNLClsI9anAfp3_VXePsT2Zzgp23Vh_Z33qtA0TenyNLj91zabO3Tym7BUE9VMQ/exec';
 
 // DOM Elements
 const loginSection = document.getElementById('login-section');
@@ -10,8 +11,6 @@ const logoutBtn = document.getElementById('logout-btn');
 
 /**
  * A helper function to make POST requests to the server.
- * @param {object} body The data to send in the request body.
- * @returns {Promise<object>} The JSON response from the server.
  */
 const postToServer = async (body) => {
     console.log('[CLIENT] Sending data to server:', body);
@@ -33,13 +32,12 @@ const postToServer = async (body) => {
         return jsonResponse;
     } catch (error) {
         console.error('[CLIENT] Error in postToServer:', error);
-        throw error; // Re-throw the error to be caught by the caller
+        throw error;
     }
 };
 
 /**
  * Handles the login process.
- * @param {Event} event The form submission event.
  */
 const handleLogin = async (event) => {
     event.preventDefault();
@@ -62,9 +60,16 @@ const handleLogin = async (event) => {
             console.log('[CLIENT] Login successful.');
             loginStatus.textContent = 'Login successful!';
             loginStatus.style.color = 'green';
+            
+            // Store session info
             document.cookie = `authToken=${result.token};max-age=604800;path=/;SameSite=Lax`;
             sessionStorage.setItem('attendanceUser', JSON.stringify(result.user));
+            if (result.scriptVersion) {
+                sessionStorage.setItem('scriptVersion', result.scriptVersion);
+            }
+            
             showMainApp();
+            logVersions(); // Log versions after showing the app
         } else {
             throw new Error(result.error || 'Invalid username or password.');
         }
@@ -81,6 +86,7 @@ const handleLogin = async (event) => {
 const handleLogout = () => {
     console.log('[CLIENT] Logging out.');
     sessionStorage.removeItem('attendanceUser');
+    sessionStorage.removeItem('scriptVersion');
     document.cookie = 'authToken=; max-age=0; path=/;';
     showLogin();
 };
@@ -101,6 +107,17 @@ const showLogin = () => {
     loginSection.classList.remove('hidden');
 };
 
+/**
+ * Logs the frontend and backend script versions to the console.
+ */
+const logVersions = () => {
+    console.info(`%c[VERSIONS] Frontend: ${APP_VERSION}`, 'color: blue; font-weight: bold;');
+    const backendVersion = sessionStorage.getItem('scriptVersion');
+    if (backendVersion) {
+        console.info(`%c[VERSIONS] Backend:  ${backendVersion}`, 'color: green; font-weight: bold;');
+    }
+}
+
 // --- Initial Load ---
 document.addEventListener('DOMContentLoaded', () => {
     loginForm.addEventListener('submit', handleLogin);
@@ -112,8 +129,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (token && user) {
         console.log('[CLIENT] User is already logged in.');
         showMainApp();
+        logVersions(); // Log versions on initial load if already logged in
     } else {
         console.log('[CLIENT] User needs to log in.');
         showLogin();
+        // Log only frontend version if not logged in
+        console.info(`%c[VERSIONS] Frontend: ${APP_VERSION}`, 'color: blue; font-weight: bold;');
     }
 });
